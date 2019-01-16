@@ -1,7 +1,9 @@
 
 #include <iostream>
 #include <vector>
+#include <bitset>
 #include <chrono>
+#include <limits>
 
 // Отсюда
 // https://stackoverflow.com/a/21995693
@@ -20,36 +22,37 @@ struct measure
 };
 
 
+template <int S>
 class eratos
 {
+    static_assert(S < 30000, "test");
+
 public:
-	void operator()(int n)
+    void operator()(void)
 	{
-		// if(n < 10) throw std::invalid_argument("Pfff...");
+        std::cout << "\n\nEratosfen functor" << std::endl;
+        std::bitset<S> v;
 
-		std::cout << "\n\nEratosfen functor\n";
-		std::vector<bool> v(n, false);
-
-		for(int i=2; i < (n/2); i++)
+        for(unsigned int i=2; i < (S/2); i++)
 		{
-			int j = i;
-			while(j < n)
+            unsigned int j = i;
+            while(j < S)
 			{
 				j += i;
 				v[j] = true;
 			}
 		}
 
-		for(int i=0; i < n; i++)
+        int cnt = 0;
+        for(unsigned int i=0; i < S; i++)
 		{
 			if(v[i] == false)
+            {
 				std::cout << i << "  ";
+                cnt++;
+            }
 		}
-		std::cout << "\n\n";
-
-		// for(const auto it: v)
-		// 	std::cout << it << "  ";
-
+        std::cout << "\nНайдено " << cnt << " чисел" << std::endl;
 	}
 };
 
@@ -77,7 +80,7 @@ int main()
 	std::cout << a << "\n";
 	std::cout << cnt << std::endl;
 
-	a = 1234567890;
+    a = 1234567895;
 	b = 12;
 	cnt = 0;
 
@@ -102,11 +105,13 @@ int main()
 
 
 	// Решето Эратосфена
-	eratos e;
+//    eratos<1000000000> e;
 
-	auto t = measure<>::execution(e, 90);
+//    auto t = measure<>::execution(e);
 
-	std::cout << "\nexecution " << t << " ms" << std::endl;
+//	std::cout << "\nexecution " << t << " ms" << std::endl;
+
+
 
 	return 0;
 }
