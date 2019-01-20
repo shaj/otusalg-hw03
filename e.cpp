@@ -88,7 +88,7 @@ public:
 	{
 		unsigned long long int a = 1;
 		unsigned long long int b = 1;
-		unsigned long long int f;
+        unsigned long long int f = 0;
 		for(int i=0; i<(n-2); i++)
 		{
 			f = a + b;
@@ -100,26 +100,54 @@ public:
 };
 
 
-class fibo1
+class fibo_alg
 {
 
 public:
 	void operator()(int n)
 	{
-		unsigned long long int a = 1;
-		unsigned long long int b = 1;
-		unsigned long long int f;
-		for(int i=0; i<n; i++)
-		{
-			f = a + b;
-			a = b;
-			b = f;
-		}
-		std::cout << "Fibo for n = " << n << " is " << f << std::endl;
 	}
 };
 
+class fibo_matr
+{
 
+public:
+    int operator()(int n)
+    {
+//        std::array<unsigned long long int, 4> v {1, 1, 1, 0};
+        int v = 5;
+        int res = 0;
+
+        std::vector<int> buf(static_cast<std::size_t>(n/2+1));
+
+        if(n < 2) throw std::runtime_error("Value error");
+        if(n == 2) return v*v;
+
+        int pow = 2;
+        buf[0] = v*v;   // Индекс buf + 2 => степень сохраненного числа
+        while(1)
+        {
+            pow *= 2;
+            if(pow > n)
+            {
+                for(int i=pow/2; i<n; i++)
+                    res = res * v;
+                return res;
+            }
+            else if(pow == n)
+            {
+                return res*res;
+            }
+            else
+            {
+                res = res * res;
+                buf[pow] = res;
+            }
+
+        }
+    }
+};
 
 
 int main()
@@ -144,7 +172,7 @@ int main()
 	std::cout << "Alg 1: " << a << "\n";
 	std::cout << cnt << std::endl;
 
-	a = 1234567895;
+    a = 1234567890;
 	b = 12;
 	cnt = 0;
 
@@ -164,9 +192,10 @@ int main()
 	std::cout << "Alg 2: " << std::max(a, b) << "\n";
 	std::cout << cnt << std::endl;
 
+    {
+        // Быстрое возведение в степень
 
-	// Быстрое возведение в степень
-
+    }
 
 
 	{
@@ -179,6 +208,7 @@ int main()
 	}
 
 	{
+        // Числа Фибоначчи
 		fibo f;
 		auto t = measure<>::execution(f, 900);
 		std::cout << "\nexecution " << t << " ms" << std::endl;
