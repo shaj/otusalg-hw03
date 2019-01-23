@@ -6,6 +6,14 @@
 #include <limits>
 #include <memory>
 
+#include <cstdlib>
+#include <cmath>
+
+#include "gmp.h"
+// #include "gmp-impl.h"
+// #include <gmpxx.h>
+
+
 // Отсюда
 // https://stackoverflow.com/a/21995693
 template<typename TimeT = std::chrono::milliseconds>
@@ -42,31 +50,100 @@ public:
 		if(n > 100) r.reserve(n / 100);
 		std::cout << "trace 4" << std::endl;
 
-std::cout << "Find " << measure<std::chrono::microseconds>::execution([&]()
-{
-		for(unsigned int i=2; i < (n/2); i++)
+		std::cout << "Find " << measure<std::chrono::microseconds>::execution([&]()
 		{
-			unsigned int j = i * 2;
-			while(j < n)
+			for(unsigned int i=2; i < (n/2); i++)
 			{
-				v[j] = true;
-				j += i;
+				unsigned int j = i * 2;
+				while(j < n)
+				{
+					v[j] = true;
+					j += i;
+				}
 			}
-		}
-}) << " us\n";
+		}) << " us\n";
 
 		std::cout << "trace 5" << std::endl;
 
-std::cout << "Emplace " << measure<std::chrono::microseconds>::execution([&]()
-{
-		for(unsigned int i=0; i < n; i++)
+		std::cout << "Emplace " << measure<std::chrono::microseconds>::execution([&]()
 		{
-			if(v[i] == false)
+			for(unsigned int i=0; i < n; i++)
 			{
-				r.emplace_back(i);
+				if(v[i] == false)
+				{
+					r.emplace_back(i);
+				}
+			}
+		}) << " us\n";
+
+		std::cout << "trace 6" << std::endl;
+	}
+
+	const auto &result() const
+	{
+		return r;
+	}
+
+};
+
+template <unsigned int BLKSIZE = 1000>
+class eratos1
+{
+
+	std::vector<unsigned int> r;
+
+public:
+	void operator()(unsigned int n)
+	{
+		unsigned int istart = 0;
+		unsigned int iend = BLKSIZE - 1;
+
+		std::cout << "\n\nEratosfen functor" << std::endl;
+		
+		std::cout << "trace 1" << std::endl;
+		std::vector<bool> v(BLKSIZE, false);
+		std::cout << "trace 2" << std::endl;
+		r.empty();
+		std::cout << "trace 3" << std::endl;
+		if(n > 100) r.reserve(n / 100);
+		std::cout << "trace 4" << std::endl;
+
+		while(iend < (n-1))
+		{
+			for(unsigned int i=istart; i<iend; i++)
+			{
+				for(unsigned int j=0; j<i/2; j++)
+				{
+					
+				}
 			}
 		}
-}) << " us\n";
+
+		std::cout << "Find " << measure<std::chrono::microseconds>::execution([&]()
+		{
+			for(unsigned int i=2; i < (n/2); i++)
+			{
+				unsigned int j = i * 2;
+				while(j < n)
+				{
+					v[j] = true;
+					j += i;
+				}
+			}
+		}) << " us\n";
+
+		std::cout << "trace 5" << std::endl;
+
+		std::cout << "Emplace " << measure<std::chrono::microseconds>::execution([&]()
+		{
+			for(unsigned int i=0; i < n; i++)
+			{
+				if(v[i] == false)
+				{
+					r.emplace_back(i);
+				}
+			}
+		}) << " us\n";
 
 		std::cout << "trace 6" << std::endl;
 	}
@@ -79,23 +156,29 @@ std::cout << "Emplace " << measure<std::chrono::microseconds>::execution([&]()
 };
 
 
-
-class fibo
+class fibo_sum
 {
 
 public:
 	void operator()(int n)
 	{
-		unsigned long long int a = 1;
-		unsigned long long int b = 1;
-        unsigned long long int f = 0;
+		mpz_t a, b, f;
+		mpz_init(a);
+		mpz_init(b);
+		mpz_init(f);
+		mpz_set_ui(a, 1);
+		mpz_set_ui(b, 1);
+		mpz_set_ui(f, 0);
+
 		for(int i=0; i<(n-2); i++)
 		{
-			f = a + b;
-			a = b;
-			b = f;
+			mpz_add(f, a, b);
+			mpz_set(a, b);
+			mpz_set(b, f);
 		}
-		std::cout << "Fibo for n = " << n << " is " << f << std::endl;
+		std::cout << "Fibo for n = " << n << " is ";
+		mpz_out_str(stdout, 10, f);
+		std::cout << std::endl;
 	}
 };
 
@@ -103,13 +186,24 @@ public:
 class fibo_alg
 {
 
+static constexpr auto sqrtfive = std::sqrt(5.0L);
+static constexpr auto fi = (1.0L + sqrtfive) / 2.0L;
+
 public:
 	void operator()(int n)
 	{
+		auto fres = std::pow(fi, n) / sqrtfive + 0.5L;
+		mpz_t ret;
+		mpz_init(ret);
+		mpz_set_d(ret, fres);
+
+		std::cout << "Fibo for n = " << n << " is ";
+		mpz_out_str(stdout, 10, ret);
+		std::cout << std::endl;
 	}
 };
 
-class fibo_matr
+class fibo_matrix
 {
 
 public:
@@ -209,9 +303,23 @@ int main()
 
 	{
         // Числа Фибоначчи
-		fibo f;
-		auto t = measure<>::execution(f, 900);
-		std::cout << "\nexecution " << t << " ms" << std::endl;
+		fibo_sum f;
+		auto t = measure<std::chrono::microseconds>::execution(f, 900);
+		std::cout << "\nexecution fibo_summ " << t << " us" << std::endl;
+	}
+
+	{
+        // Числа Фибоначчи
+		fibo_alg f;
+		auto t = measure<std::chrono::microseconds>::execution(f, 900);
+		std::cout << "\nexecution fibo_alg " << t << " us" << std::endl;
+	}
+
+	{
+        // Числа Фибоначчи
+		fibo_matrix f;
+		auto t = measure<std::chrono::microseconds>::execution(f, 900);
+		std::cout << "\nexecution fibo_matrix " << t << " us" << std::endl;
 	}
 
 	return 0;
