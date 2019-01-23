@@ -16,3 +16,11 @@ set_target_properties(e PROPERTIES
 target_link_libraries(e gmp)
 
 
+add_executable(p primesieve.cpp)
+
+set_target_properties(p PROPERTIES
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED ON
+  COMPILE_OPTIONS -Wpedantic -Wall -Wextra
+)
+

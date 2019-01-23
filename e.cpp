@@ -31,6 +31,54 @@ struct measure
 };
 
 
+namespace otusalg
+{
+
+template <typename T>
+T pow(T base, unsigned int exp)
+{
+	int cnt = 0;
+	unsigned int ti = exp;
+	std::vector<T> pow2(sizeof(exp) * 8);
+
+	pow2[0] = base;
+	ti = ti >> 1;
+	while(ti)
+	{
+		cnt++;
+		pow2[cnt] = pow2[cnt-1] * pow2[cnt-1];
+		ti = ti >> 1;
+	}
+
+	ti = exp;
+	T retval;
+	int bitcnt = 0;
+	bool init = false;
+	while(ti)
+	{
+		if(ti & 1)
+		{
+			if(init)
+			{
+				retval = retval * pow2[bitcnt];
+				cnt++;
+			}
+			else
+			{
+				retval = pow2[bitcnt];
+				init = true;
+			}
+		}
+		ti = ti >> 1;
+		bitcnt++;
+	}
+	std::cout << "\npow2::cnt " << cnt << std::endl;
+}
+
+
+} // namespace otusalg
+
+
 class eratos
 {
 
@@ -288,6 +336,7 @@ int main()
 
     {
         // Быстрое возведение в степень
+        std::cout << otusalg::pow<unsigned long long int>(123, 456) << std::endl;
 
     }
 
