@@ -34,6 +34,9 @@ struct measure
 namespace otusalg
 {
 
+
+// Алгоритм отсюда
+// https://ru.wikipedia.org/wiki/%D0%90%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D1%8B_%D0%B1%D1%8B%D1%81%D1%82%D1%80%D0%BE%D0%B3%D0%BE_%D0%B2%D0%BE%D0%B7%D0%B2%D0%B5%D0%B4%D0%B5%D0%BD%D0%B8%D1%8F_%D0%B2_%D1%81%D1%82%D0%B5%D0%BF%D0%B5%D0%BD%D1%8C#%D0%A1%D1%85%D0%B5%D0%BC%D0%B0_%D1%81_%D0%BF%D1%80%D0%B5%D0%B4%D0%B2%D0%B0%D1%80%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D0%BD%D1%8B%D0%BC_%D0%B2%D1%8B%D1%87%D0%B8%D1%81%D0%BB%D0%B5%D0%BD%D0%B8%D0%B5%D0%BC
 template <typename T>
 T pow(T base, unsigned int exp)
 {
@@ -73,7 +76,109 @@ T pow(T base, unsigned int exp)
 		bitcnt++;
 	}
 	std::cout << "\npow2::cnt " << cnt << std::endl;
+	return retval;
 }
+
+
+class gmpxxx
+{
+public:
+
+private:
+	mpz_t _data;
+
+
+public:
+	gmpxxx()
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		mpz_init(_data);
+		mpz_set_ui(_data, 0);
+	}
+
+	gmpxxx(unsigned int d) : gmpxxx()
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		mpz_set_ui(_data, d);
+	}
+
+	gmpxxx(gmpxxx &rhs)
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		mpz_set(_data, rhs.getData());
+	}
+
+	gmpxxx(gmpxxx &&rhs)
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		mpz_swap(_data, rhs.D());
+	}
+
+	~gmpxxx(){}
+
+
+	gmpxxx& operator*=(const gmpxxx &rhs)
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		mpz_mul(_data, _data, rhs.getData());
+		return *this;
+	}
+
+	// gmpxxx& operator=(gmpxxx arg)
+	// {
+	// 	// swap(arg);
+	// 	mpz_mul(_data, _data, arg.getData());
+	// 	return *this;
+	// }
+
+	gmpxxx& operator=(const gmpxxx &rhs)
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		if(this != &rhs)
+		{
+			mpz_set(_data, rhs.getData());
+		}
+		return *this;
+	}
+
+	gmpxxx& operator=(gmpxxx &&rhs)
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		if(this != &rhs)
+		{
+			mpz_swap(_data, rhs.D());
+		}
+		return *this;
+	}
+
+
+	const mpz_t& getData() const
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		return _data;
+	}
+
+	mpz_t& D()
+	{
+		std::cout << __PRETTY_FUNCTION__ << std::endl;
+		return _data;
+	}
+	
+};
+
+std::ostream& operator<<(std::ostream& out, const gmpxxx& m)
+{
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	mpz_out_str(stdout, 10, m.getData());
+	return out;
+}
+
+gmpxxx operator*(gmpxxx lhs, const gmpxxx &rhs)
+{
+	std::cout << __PRETTY_FUNCTION__ << std::endl;
+	return lhs *= rhs;
+}
+
 
 
 } // namespace otusalg
@@ -336,8 +441,19 @@ int main()
 
     {
         // Быстрое возведение в степень
-        std::cout << otusalg::pow<unsigned long long int>(123, 456) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(2, 2) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(5, 12) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(4, 12) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(3, 12) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(3, 15) << std::endl;
+        std::cout << otusalg::pow<unsigned long long int>(11, 12) << std::endl;
 
+        std::cout << "gmpxxx\n";
+
+        otusalg::gmpxxx m3(5);
+        std::cout << otusalg::pow<otusalg::gmpxxx>(m3, 12) << std::endl;
+        otusalg::gmpxxx m4(123);
+        std::cout << otusalg::pow<otusalg::gmpxxx>(m4, 456) << std::endl;
     }
 
 
